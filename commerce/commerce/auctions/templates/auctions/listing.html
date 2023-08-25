@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+{% if listing %}
+    <h2>Listing: {{ listing.title }}</h2>
+    <img src="{% static 'auctions/' %}{{listing.title}}.jpg" alt="{{ listing.image_url }}" class="img-fluid pic"><br>
+    <hr>
+    <p>{{ listing.description }}</p>
+    <h3><p>${{ listing.min_bid }}</p></h3>
+
+    <h3>Details</h3>
+    <ul>
+        <li>Listed by: {{listing.creator}}</li>
+        <li>Category: {{listing.category}}</li>
+    </ul>
+{% else %}
+<h1 class="text-center" >Product Not Found</h1>
+{% endif %}
+
+{% endblock %}

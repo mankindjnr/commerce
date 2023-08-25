@@ -1,0 +1,45 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h1>Create your listing below</h1>
+<div>
+    <form action="{% url 'create_listing' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {{ form.non_field_errors }}
+        
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}">Listing title:</label>
+            <input type="text" class="form-control" id="{{ form.title.id_for_label }}" name="{{ form.title.name }}" value="{{title}}" placeholder="products name">
+            {{ form.title.errors }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.description.id_for_label }}">Description:</label>
+            <textarea class="form-control" id="{{ form.description.id_for_label }}" name="{{ form.description.name }}" rows="3" placeholder="products description"></textarea>
+            {{ form.description.errors }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.min_bid.id_for_label }}">Starting bid:</label>
+            <input type="number" class="form-control" id="{{ form.min_bid.id_for_label }}" name="{{ form.min_bid.name }}" value="{{min_bid}}" placeholder="starting bid">
+            {{ form.min_bid.errors }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.category.id_for_label }}">Category:</label>
+            <input type="text" class="form-control" id="{{ form.category.id_for_label }}" name="{{ form.category.name }}" value="{{category}}" placeholder="category">
+            {{ form.category.errors }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.image_url.id_for_label }}">Image URL:</label>
+            <input type="text" class="form-control" id="{{ form.image_url.id_for_label }}" name="{{ form.image_url.name }}" value="{{image_url}}" placeholder="image url">
+            {{ form.image_url.errors }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    
+</div>
+{% endblock %}
