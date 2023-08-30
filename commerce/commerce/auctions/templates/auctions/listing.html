@@ -4,13 +4,58 @@
 {% block body %}
 
 {% if listing %}
+    {% if is_bid_open %}
+        {% if creator %}
+                <form action="{% url 'close_auction' listing.id %}" id="listingStatus" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">close auction</button>
+                </form>
+            {% elif watching %}
+                <form action="{% url 'rmv_from_watchlist' listing.id %}" id="watchlistForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">remove from watchlist</button>
+                </form>
+            {% else %}
+                <form action="{% url 'item_watchlist' listing.id %}" id="watchlistForm" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">add to watchlist</button>
+                </form>
+        {% endif %}
+    {% else %}
+        {% if creator %}
+            <h1 class="text-center btn btn-primary">you closed the auction</h1>
+        {% else %}
+            <h1 class="text-center btn btn-primary">the auction is closed</h1>
+        {% endif %}
+    {% endif %}
+    
     <h2>Listing: {{ listing.title }}</h2>
     <img src="{% static 'auctions/' %}{{listing.title}}.jpg" alt="{{ listing.image_url }}" class="img-fluid pic"><br>
     <hr>
     <p>{{ listing.description }}</p>
-    <h3><p>${{ listing.min_bid }}</p></h3>
+    <h3><p>${{ max_bid }}</p></h3>
+    
+    {% if not creator %}
+        {% if is_bid_open %}
+            <form action="{% url 'add_bid' listing.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
 
+                {{ form.non_field_errors }}
+
+                <div class="form-group">
+                    <label for="{{ form.bid_amount.id_for_label }}">{{ num_of_bids }} bid(s) so far.</label>
+                    <input type="number" class="form-control" id="{{ form.bid_amount.id_for_label }}" name="{{form.bid_amount.name}}" placeholder="Bid">
+                    {{ form.bid_amount.errors }}
+                </div>
+                <button type="submit" class="btn btn-primary" onclick="refreshPage()">Place Bid</button>
+            </form>
+        {% endif %}
+    {% endif %}
     <h3>Details</h3>
+    
+    {% if winner is not None %}
+        <h4>Winner: {{ winner }}</h4>
+    {% endif %}
     <ul>
         <li>Listed by: {{listing.creator}}</li>
         <li>Category: {{listing.category}}</li>

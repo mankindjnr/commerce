@@ -17,17 +17,23 @@ class auction_listing(models.Model):
     # add time later(correct current time)
 
     def __str__(self):
-        return f"{self.title} listed at {self.timestamp.strftime('%B %d, %Y %H:%M:%S')}"
+        return f"{self.title} id:{self.id} time: {self.timestamp.strftime('%B %d, %Y %H:%M:%S')}"
 
 class watchlist(models.Model):
     watcher = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(auction_listing, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"user:{self.watcher} prod:{self.product}"
 
 class bids(models.Model):
     bidder = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(auction_listing, on_delete=models.CASCADE)
     bid_amount = models.IntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.id} me:{self.bidder}: {self.product} {self.bid_amount}"
 
 class comments(models.Model):
     commenter = models.ForeignKey(User, on_delete=models.CASCADE)

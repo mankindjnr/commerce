@@ -1,0 +1,42 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+
+{% if products %}
+<h2 class="text-center mt-2 mb-4" >Watchlist</h2>
+    {% for prod in products %}
+        <div class="container">
+            <div class="row first-row">
+                <div class="col-12 col-sm-7 px-5">
+                    <img src="{% static 'auctions/' %}{{prod.product.title}}.jpg" alt="{{ product.image_url }}" class="img-fluid pic"><br>
+                </div>
+
+                <div class="col-12 col-sm-5" >
+                    {% if user.is_authenticated %}
+                        <h2><a href="{% url 'listings' prod.product.id %}">{{ prod.product.title }}</a></h2>
+                    {% else %}-->
+                        <h2>{{ prod.product.title }}</h2>
+                    {% endif %}
+                    <!--a straight line-->
+                    <hr>
+                    <b>{{ prod.product.description }}</b>
+                    <br>
+                    <b>Price: $</b>{{ prod.product.min_bid }}
+                    <br>
+                    {{ prod.product.category }}
+                    <br>
+                    {{ prod.product.timestamp }}
+                    <br>
+                    <p>Posted by: {{ prod.product.creator }}</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% else %}
+    <p class="text-center" >You are not watching a damn thing.</p>
+{% endif %}
+
+{% endblock %}

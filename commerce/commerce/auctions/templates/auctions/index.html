@@ -11,7 +11,11 @@
                 </div>
 
                 <div class="col-12 col-sm-5" >
-                    <h2><a href="{% url 'listings' listing.id %}">{{ listing.title }}</a></h2>
+                    {% if user.is_authenticated %}
+                        <h2><a href="{% url 'listings' listing.id %}">{{ listing.title }}</a></h2>
+                    {% else %}
+                        <h2>{{ listing.title }}</h2>
+                    {% endif %}
                     <!--a straight line-->
                     <hr>
                     <b>{{ listing.description }}</b>
