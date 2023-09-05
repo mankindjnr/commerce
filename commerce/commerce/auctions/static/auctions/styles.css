@@ -12,3 +12,11 @@ body {
 .pic {
     width: 250px;
 }
+
+.p_comments, h5 {
+    text-align: left;
+}
+
+.timestamp {
+    text-align: right;
+}

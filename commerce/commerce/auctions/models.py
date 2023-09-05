@@ -37,5 +37,6 @@ class bids(models.Model):
 
 class comments(models.Model):
     commenter = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(auction_listing, on_delete=models.CASCADE)
     the_comment = models.TextField(max_length=250)
     timestamp = models.DateTimeField(auto_now_add=True)

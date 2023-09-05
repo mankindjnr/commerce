@@ -1,0 +1,30 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+    {% if listings %}
+        <h2>Available Categories</h2>
+        <ul>
+            {% for listing in listings %}
+                <li><a href="{% url 'category' listing.category %}">{{ listing.category }}</a></li>
+            {% endfor %}
+        </ul>
+    {% elif items %}
+        {% for item in items %}
+            <div class="card">
+                <div class="card-body">
+                    {% if user.authenticated %}
+                        <h5 class="card-title"><a href="{% url 'listings' item.id %}">{{ item.title }}</a></h5>
+                    {% else %}
+                        <h5 class="card-title">{{ item.title }}</h5>
+                    {% endif %}
+                    <p class="card-text">{{ item.description }}</p>
+                    <p class="card-text">Current bid: ${{ item.min_bid }}</p>
+                    <p class="card-text">Category: {{ item.category }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No active listings.</p>
+    {% endif %}
+{% endblock %}

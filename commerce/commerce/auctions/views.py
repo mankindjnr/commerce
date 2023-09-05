@@ -8,6 +8,7 @@ from django.contrib import messages
 from django import forms
 from datetime import datetime
 from pprint import pprint
+from rest_framework import exceptions
 
 from .models import User, auction_listing, comments, bids, watchlist
 
@@ -23,6 +24,11 @@ class bidForm(forms.Form):
 
 class commentsForm(forms.Form):
     the_comment = forms.CharField(label="comment section", widget=forms.Textarea, required=True)
+
+class customError(exceptions.APIException):
+    status_code = 400
+    default_detailt = "This is a custom error!"
+
 # --------------------------Active listings page/default route-----------------------------------
 def index(request):
     #all_bids = bids.objects.all()
@@ -96,7 +102,13 @@ def listing(request, obj_id):
     print(bid_ids)
     print("-------------------------------------")
     form = bidForm()
-
+    comments_form = commentsForm()
+    print("-----------comment section-----------")
+    comment_section = False
+    if comments.objects.filter(product=listing):
+        comment_section = comments.objects.filter(product=listing)
+    print(comments.objects.all())
+    print("-----------------------------------------")
     # watchlist
     watching = False
     if watchlist.objects.all() is not None:
@@ -134,8 +146,9 @@ def listing(request, obj_id):
         "winner": winner,
         "is_bid_open": is_bid_open,
         "num_of_bids": num_of_bids,
-        #"comments": comments,
-        "form": form
+        "the_comments": comment_section,
+        "form": form,
+        "comment_form": comments_form
     })
 
 # --------------------------------------add_bid------------------------------------------------
@@ -146,30 +159,31 @@ def add_bid(request, obj_id):
             # instance of the current object
             listing = auction_listing.objects.get(id=obj_id)
             #handling the form data
-            bid_amount = form.cleaned_data['bid_amount']
+            amt_of_bid = form.cleaned_data['bid_amount']
             
             print("-------------------listing attr--------")
             bid_queryset = bids.objects.filter(product=listing)
             bid_amts = [bid.bid_amount for bid in bid_queryset]
             print(bid_amts)
-            print("---bid_amt---", bid_amount)
-            print(type(bid_amount))
+            print("---bid_amt---", amt_of_bid)
+            print(type(amt_of_bid))
             print("---maxbid---", max(bid_amts))
             print("---typemax---", type(max(bid_amts)))
-            if bid_amount > max(bid_amts):
+            if amt_of_bid > max(bid_amts):
                 print("its greater")
             else:
                 print("not so much")
             print("-------------------------------------------")
-            if bid_amount <= max(bid_amts):
+            if amt_of_bid <= max(bid_amts):
                 print("inside error")
+                #raise customError("my error message")
                 form.add_error('bid_amount', "Your bid must be greater than the current bid!")
             else:
                 print("outside error")
                 new_bid = bids(
                     bidder = request.user,
                     product = listing,
-                    bid_amount = bid_amount
+                    bid_amount = amt_of_bid
                 )
                 new_bid.save()
                 print("---------new bid------------")
@@ -221,6 +235,38 @@ def rmv_from_watchlist(request, obj_id):
             return redirect("index")
     
     return redirect("listings", obj_id)
+# -------------------------------the comment section--------------------------------------------
+def comment_section(request, obj_id):
+    if request.method == "POST":
+        form = commentsForm(request.POST)
+        if form.is_valid():
+            listing = auction_listing.objects.get(id=obj_id)
+            your_comment = form.cleaned_data['the_comment']
+
+            comments_section = comments(
+                commenter = request.user,
+                product = listing,
+                the_comment = your_comment
+            )
+
+            comments_section.save()
+            return redirect("listings", obj_id)
+    else:
+        comment_form = commentsForm()
+    
+    return redirect("listings", obj_id)
+#-------------------------------------category-------------------------------------------------
+def categories(request):
+    return render(request, "auctions/categories.html", {
+        "listings": auction_listing.objects.all()
+    })     
+
+
+def category(request, obj_str):
+    all_items = auction_listing.objects.filter(category=obj_str)
+    return render(request, "auctions/categories.html", {
+        "items": all_items
+    })
 # ==============================================================================================
 def login_view(request):
     if request.method == "POST":

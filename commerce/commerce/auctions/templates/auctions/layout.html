@@ -8,6 +8,7 @@
         <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
         <script src="{% static 'auctions/refresh.js' %}"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        {% include 'auctions/bootstrap.html' %}
         
     </head>
     <body>
@@ -22,6 +23,9 @@
         <ul class="nav">
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'categories' %}">categories</a>
             </li>
             {% if user.is_authenticated %}
                 <li class="nav-item">
@@ -43,7 +47,9 @@
             {% endif %}
         </ul>
         <hr>
-        {% block body %}
-        {% endblock %}
+        <div class="container">
+            {% block body %}
+            {% endblock %}
+        </div>
     </body>
 </html>

@@ -13,5 +13,9 @@ urlpatterns = [
     path("item_watchlist/<obj_id>", views.item_watchlist, name="item_watchlist"),
     path("rmv_from_watchlist/<obj_id>", views.rmv_from_watchlist, name="rmv_from_watchlist"),
     path("close_auction/<obj_id>", views.close_auction, name="close_auction"),
-    path("my_watchlist", views.my_watchlist, name="my_watchlist")
+    path("my_watchlist", views.my_watchlist, name="my_watchlist"),
+    path("comment_section/<obj_id>", views.comment_section, name="comment_section"),
+    path("categories", views.categories, name="categories"),
+    path("category/<obj_str>", views.category, name="category")
+
 ]
