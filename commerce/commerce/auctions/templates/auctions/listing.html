@@ -35,7 +35,47 @@
             <img src="{% static 'auctions/' %}{{listing.title}}.jpg" alt="{{ listing.image_url }}" class="img-fluid pic"><br>
             <hr>
             <p>{{ listing.description }}</p>
-            <h3><p>${{ max_bid }}</p></h3>
+            <h3><p>${{ max_bid }} </p></h3>
+
+            <!--pay if you are the winner-->
+            {% if user_winner %}
+                {% if paid %}
+                        <button type="button" class="btn btn-primary">Shipping in progress</button>
+                {% else %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mpesaModal">
+                        pay with m-pesa
+                    </button>
+                {% endif %}
+
+                <div class="modal fade" id="mpesaModal" tabindex="-1" aria-labelledby="mpesaModalLable" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="mpesaModalLable">Comments</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{% url 'pay' listing.id %}" id="mpesaForm" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="{{ mpesa_form.phone_num.id_for_label }}">Pay with Mpesa</label>
+                                        <input type="number" class="form-control" id="{{ mpeasa_form.phone_num.id_for_label }}" name="{{ mpesa_form.phone_num.name }}" value="{{phone_num}}" placeholder="phone number">
+                                        {{ mpesa_form.phone_num.errors }}
+
+                                        <label for="{{ mpesa_form.title.id_for_label }}">Pay with Mpesa</label>
+                                        <input type="number" class="form-control" id="{{ form.pay_amount.id_for_label }}" name="{{ mpesa_form.pay_amount.name }}" value="{{pay_amount}}" placeholder="amount">
+                                        {{ mpesa_form.pay_amount.errors }}
+                                        <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">pay</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <!--end mpesa dialog-->
             
             {% if not creator %}
                 {% if is_bid_open %}
@@ -43,7 +83,7 @@
                         {% csrf_token %}
 
                         <div class="form-group">
-                            <label for="{{ form.bid_amount.id_for_label }}">{{ num_of_bids }} bid(s) so far.</label>
+                            <label for="{{ form.bid_amount.id_for_label }}">{{ num_of_bids }} bid(s) so far. {% if user == max_bidder %} <b>|</b> Your bid is the current bid {% endif %} </label>
                             <input type="number" class="form-control" id="{{ form.bid_amount.id_for_label }}" name="{{form.bid_amount.name}}" placeholder="Bid">
                         </div>
                         {% if form.bid_amount.errors %}

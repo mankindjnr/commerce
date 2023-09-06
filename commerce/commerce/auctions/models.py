@@ -35,6 +35,13 @@ class bids(models.Model):
     def __str__(self):
         return f"{self.id} me:{self.bidder}: {self.product} {self.bid_amount}"
 
+class mpesa(models.Model):
+    payer = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(auction_listing, on_delete=models.CASCADE)
+    paid = models.IntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
 class comments(models.Model):
     commenter = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(auction_listing, on_delete=models.CASCADE)

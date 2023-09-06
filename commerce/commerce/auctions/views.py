@@ -10,7 +10,7 @@ from datetime import datetime
 from pprint import pprint
 from rest_framework import exceptions
 
-from .models import User, auction_listing, comments, bids, watchlist
+from .models import User, auction_listing, comments, bids, watchlist, mpesa
 
 class listingForm(forms.Form):
     title = forms.CharField(label="listing title", min_length=3, max_length=100, required=True)
@@ -24,6 +24,10 @@ class bidForm(forms.Form):
 
 class commentsForm(forms.Form):
     the_comment = forms.CharField(label="comment section", widget=forms.Textarea, required=True)
+
+class mpesaForm(forms.Form):
+    phone_num = forms.IntegerField(label="phone_num", required=True)
+    pay_amount = forms.IntegerField(label="winning_bid_amount", required=True)
 
 class customError(exceptions.APIException):
     status_code = 400
@@ -125,18 +129,40 @@ def listing(request, obj_id):
 
     #auction winner
     winner = None
+    user_winner = None
+    message = None
+    paid = None
+    max_bidder = None
+    mpesa_form = mpesaForm()
 
     if not is_bid_open:
         winning_bid = max([bid.bid_amount for bid in bid_queryset])
         winner_bid = bids.objects.filter(bid_amount=winning_bid)
         for win in winner_bid:
             winner = win.bidder
+    
+    # max bidder
+    if bids.objects.filter(product=listing):
+        largest_bid = max([bid.bid_amount for bid in bid_queryset])
+        largest_bidder = bids.objects.filter(bid_amount=largest_bid)
+
+        for large_bidder in largest_bidder:
+            if large_bidder.bidder != creator:
+                max_bidder = large_bidder.bidder
+
+
+    # check if the current user is the winner
+    if request.user == winner:
+        user_winner = True
+    
+    # check if the product is paid for
+    paid_prod = mpesa.objects.filter(product=listing)
+    if paid_prod:
+        paid = True
 
     num_of_bids = len(bid_ids)
     max_bid = max([bid.bid_amount for bid in bid_queryset])
     print("-----max-----", max_bid)
-
-    messages.success(request, "ADDED TO WATCHLIST!")
 
     return render(request, "auctions/listing.html", {
         "listing": listing,
@@ -144,6 +170,10 @@ def listing(request, obj_id):
         "watching": watching,
         "creator": creator,
         "winner": winner,
+        "user_winner": user_winner,
+        "max_bidder": max_bidder,
+        "mpesa_form": mpesa_form,
+        "paid": paid,
         "is_bid_open": is_bid_open,
         "num_of_bids": num_of_bids,
         "the_comments": comment_section,
@@ -194,6 +224,38 @@ def add_bid(request, obj_id):
         form = bidForm()
 
     return redirect("listings", obj_id=obj_id)
+# ----------------------------------pay for product---------------------------------------------
+def pay(request, obj_id):
+    if request.method == "POST":
+        mpesa_form = mpesaForm(request.POST)
+        if mpesa_form.is_valid():
+            listing = auction_listing.objects.get(id=obj_id)
+            phone_num = mpesa_form.cleaned_data['phone_num']
+            paid = mpesa_form.cleaned_data['pay_amount']
+            print("---------------pay mpesa-------------")
+            print(phone_num)
+            print(paid)
+            print("-------------------------------------------------")
+
+            bid_product = bids.objects.filter(product=listing)
+            bid_amts = [bid.bid_amount for bid in bid_product]
+
+            if paid == max(bid_amts):        
+                pay_bid = mpesa(
+                    payer = request.user,
+                    product = listing,
+                    paid = paid
+                )
+
+                pay_bid.save()
+                return redirect("listings", obj_id)
+            else:
+                error_mess = "amount should match your winning bid"
+                return redirect("listings", obj_id)
+    else:
+        mpesa_form = mpesaForm()
+
+    return redirect("listings", obj_id)
 
 #-----------------------------------watchlist---------------------------------------------------
 def item_watchlist(request, obj_id):
