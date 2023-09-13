@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'auctions',
+    'mpesademo',
+    'nodempesa',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,13 +76,25 @@ WSGI_APPLICATION = 'commerce.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'NGf3LaHVzT7XCbfv',
+        'HOST': 'db.kvhhdtsihlnelzdwmrhw.supabase.co',
+        'PORT': '5432',  # Default PostgreSQL port
+    }
+}
+
 
 AUTH_USER_MODEL = 'auctions.User'
 
